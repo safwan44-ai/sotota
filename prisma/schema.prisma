@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enums ----------
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+// ---------- Admin ----------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+// ---------- Catalog ----------
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  nameBn    String
+  nameEn    String?
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  nameBn         String
+  nameEn         String?
+  descriptionBn  String?
+  storageInfo    String?
+  packagingInfo  String?
+  // Only fill this with VERIFIED information. Never invent origins.
+  originInfo     String?
+  isActive       Boolean          @default(true)
+  isFeatured     Boolean          @default(false)
+  // true = development sample data, must be replaced before launch
+  isSample       Boolean          @default(false)
+  // per-product switch for the public cost breakdown
+  showCostPublic Boolean          @default(false)
+  categoryId     String
+  category       Category         @relation(fields: [categoryId], references: [id])
+  variants       ProductVariant[]
+  images         ProductImage[]
+  reviews        Review[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([categoryId])
+}
+
+model ProductVariant {
+  id         String        @id @default(cuid())
+  productId  String
+  product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label      String        // for example "500g"
+  weightGram Int
+  priceTaka  Int
+  stock      Int           @default(0)
+  sku        String?       @unique
+  isActive   Boolean       @default(true)
+  cost       VariantCost?
+  orderItems OrderItem[]
+
+  @@unique([productId, weightGram])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+
+  @@index([productId])
+}
+
+// Private by default. Only shown publicly if isPublic is true
+// AND the global and per-product switches allow it.
+model VariantCost {
+  id                String         @id @default(cuid())
+  variantId         String         @unique
+  variant           ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  rawCostTaka       Int            @default(0)
+  packagingCostTaka Int            @default(0)
+  otherCostTaka     Int            @default(0)
+  isPublic          Boolean        @default(false)
+  // true = sample numbers, NOT real business data
+  isSample          Boolean        @default(true)
+  note              String?
+  updatedAt         DateTime       @updatedAt
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  authorName String
+  rating     Int
+  comment    String
+  // hidden until the admin approves it
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([productId, isApproved])
+}
+
+// ---------- Delivery and coupons ----------
+
+model DeliveryZone {
+  id            String  @id @default(cuid())
+  name          String
+  chargeTaka    Int
+  freeAboveTaka Int?
+  isActive      Boolean @default(true)
+  orders        Order[]
+}
+
+model Coupon {
+  id           String       @id @default(cuid())
+  code         String       @unique
+  type         DiscountType
+  value        Int
+  minOrderTaka Int          @default(0)
+  maxUses      Int?
+  usedCount    Int          @default(0)
+  expiresAt    DateTime?
+  isActive     Boolean      @default(true)
+  orders       Order[]
+}
+
+// ---------- Orders ----------
+
+model Order {
+  id                 String               @id @default(cuid())
+  orderNo            String               @unique
+  // secret token for the public tracking link
+  trackingToken      String               @unique @default(cuid())
+  customerName       String
+  phone              String
+  address            String
+  district           String?
+  note               String?
+  deliveryZoneId     String?
+  deliveryZone       DeliveryZone?        @relation(fields: [deliveryZoneId], references: [id])
+  couponId           String?
+  coupon             Coupon?              @relation(fields: [couponId], references: [id])
+  subtotalTaka       Int
+  deliveryChargeTaka Int
+  discountTaka       Int                  @default(0)
+  totalTaka          Int
+  paymentMethod      PaymentMethod        @default(COD)
+  status             OrderStatus          @default(PENDING)
+  items              OrderItem[]
+  history            OrderStatusHistory[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([phone])
+  @@index([status, createdAt])
+}
+
+// Snapshot of name and price at the time of purchase,
+// so later price changes never change old orders.
+model OrderItem {
+  id            String          @id @default(cuid())
+  orderId       String
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId     String?
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productNameBn String
+  variantLabel  String
+  unitPriceTaka Int
+  quantity      Int
+  lineTotalTaka Int
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  changedBy String?
+  note      String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+}
+
+// ---------- Business settings and reports ----------
+
+model Expense {
+  id         String   @id @default(cuid())
+  title      String
+  amountTaka Int
+  category   String?
+  spentAt    DateTime @default(now())
+  note       String?
+}
+
+model SiteSetting {
+  key   String @id
+  value String
+}

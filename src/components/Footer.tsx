@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { db } from "@/lib/db";
-import { site, infoPages } from "@/lib/site";
+import { site } from "@/lib/site"; import { infoPages } from "@/lib/pages";
 
 async function getCategories() {
   try {

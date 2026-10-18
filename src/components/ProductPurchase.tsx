@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { taka } from "@/lib/format";
+import { addToCart } from "@/lib/cart-store";
 
 type Cost = {
   raw: number;
@@ -24,12 +26,25 @@ export default function ProductPurchase({ variants }: { variants: Variant[] }) {
   const firstChoice = variants.find((v) => v.inStock) ?? variants[0];
   const [selectedId, setSelectedId] = useState(firstChoice.id);
   const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
 
   const selected = variants.find((v) => v.id === selectedId) ?? firstChoice;
 
   function choose(id: string) {
     setSelectedId(id);
     setQty(1);
+    setAdded(false);
+  }
+
+  function changeQty(next: number) {
+    setQty(next);
+    setAdded(false);
+  }
+
+  function handleAdd() {
+    // Only the ID and quantity are saved. The server checks the real price later.
+    addToCart(selected.id, qty);
+    setAdded(true);
   }
 
   const cost = selected.cost;
@@ -82,7 +97,7 @@ export default function ProductPurchase({ variants }: { variants: Variant[] }) {
             <button
               type="button"
               aria-label="কমান"
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              onClick={() => changeQty(Math.max(1, qty - 1))}
               className="px-4 py-2 text-lg"
             >
               −
@@ -93,7 +108,7 @@ export default function ProductPurchase({ variants }: { variants: Variant[] }) {
             <button
               type="button"
               aria-label="বাড়ান"
-              onClick={() => setQty((q) => Math.min(selected.maxQty, q + 1))}
+              onClick={() => changeQty(Math.min(selected.maxQty, qty + 1))}
               className="px-4 py-2 text-lg"
             >
               +
@@ -106,14 +121,27 @@ export default function ProductPurchase({ variants }: { variants: Variant[] }) {
         </div>
       )}
 
-      {/* The Add to Cart button is connected in the next step. */}
+      {/* Add to cart */}
       <button
         type="button"
-        disabled
-        className="mt-6 w-full cursor-not-allowed rounded-lg bg-craft/60 px-6 py-3 font-semibold text-white md:w-auto"
+        disabled={!selected.inStock}
+        onClick={handleAdd}
+        className="mt-6 w-full rounded-lg bg-forest px-6 py-3 font-semibold text-white hover:bg-forest/90 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
       >
-        কার্টে যোগ করুন (শীঘ্রই)
+        {selected.inStock ? "কার্টে যোগ করুন" : "স্টক নেই"}
       </button>
+
+      {added && (
+        <p
+          role="status"
+          className="mt-3 rounded-lg bg-green-50 px-4 py-3 text-sm text-forest"
+        >
+          ✓ কার্টে যোগ হয়েছে।{" "}
+          <Link href="/cart" className="font-semibold underline">
+            কার্ট দেখুন
+          </Link>
+        </p>
+      )}
 
       {/* Pricing transparency. Shown ONLY if the server sent cost data. */}
       {cost && (

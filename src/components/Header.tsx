@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import CartLink from "@/components/CartLink";
 
 export default function Header() {
   return (
@@ -16,15 +17,14 @@ export default function Header() {
           <span className="text-xl font-bold text-forest">সততা</span>
         </Link>
 
-        <nav className="flex items-center gap-5 text-sm font-medium">
+        <nav className="flex items-center gap-6 text-sm font-medium">
           <Link href="/" className="hover:text-forest">
             হোম
           </Link>
           <Link href="/shop" className="hover:text-forest">
             দোকান
           </Link>
-          {/* More links (cart, track order, about...) are added
-              when those pages are built. */}
+          <CartLink />
         </nav>
       </div>
     </header>

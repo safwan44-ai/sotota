@@ -81,6 +81,9 @@ export default function CartView() {
     items.some((i) => i.variantId === l.variantId)
   );
   const subtotal = lines.reduce((sum, l) => sum + l.lineTotalTaka, 0);
+  const hasPayable = lines.some(
+    (l) => l.status === "ok" || l.status === "limited"
+  );
 
   return (
     <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -181,13 +184,22 @@ export default function CartView() {
           </div>
         </dl>
 
-        <button
-          type="button"
-          disabled
-          className="mt-5 w-full cursor-not-allowed rounded-lg bg-craft/60 px-6 py-3 font-semibold text-white"
-        >
-          চেকআউট (শীঘ্রই)
-        </button>
+        {hasPayable ? (
+          <Link
+            href="/checkout"
+            className="mt-5 block w-full rounded-lg bg-forest px-6 py-3 text-center font-semibold text-white hover:bg-forest/90"
+          >
+            চেকআউটে যান
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="mt-5 w-full cursor-not-allowed rounded-lg bg-craft/60 px-6 py-3 font-semibold text-white"
+          >
+            চেকআউটে যান
+          </button>
+        )}
 
         <p className="mt-3 text-xs text-charcoal/70">
           অর্ডার নিশ্চিত করার সময় সার্ভার আবার দাম ও স্টক মিলিয়ে দেখবে।

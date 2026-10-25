@@ -203,17 +203,14 @@ const allPages: InfoPage[] = [
     ],
   },
 
-  // ----------------------------------------------------- Track order
-  // Hidden until the order tracking page is built.
   {
     slug: "track-order",
     title: "অর্ডার ট্র্যাক",
     group: "support",
-    published: false,
+    published: true,
     sections: [],
   },
 
-  // ---------------------------------------------------------- Payment
   {
     slug: "payment",
     title: "পেমেন্ট পদ্ধতি",

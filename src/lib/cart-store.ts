@@ -111,3 +111,6 @@ export function setCartQty(variantId: string, qty: number) {
 export function removeFromCart(variantId: string) {
   write(getSnapshot().filter((i) => i.variantId !== variantId));
 }
+export function clearCart() {
+  write([]);
+}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 
@@ -14,9 +15,13 @@ export default async function DashboardPage() {
   ]);
 
   const cards = [
-    { label: "নতুন (অপেক্ষমাণ) অর্ডার", value: pendingOrders },
-    { label: "মোট অর্ডার", value: totalOrders },
-    { label: "মোট পণ্য", value: totalProducts },
+    {
+      label: "নতুন (অপেক্ষমাণ) অর্ডার",
+      value: pendingOrders,
+      href: "/admin/orders?status=PENDING",
+    },
+    { label: "মোট অর্ডার", value: totalOrders, href: "/admin/orders" },
+    { label: "মোট পণ্য", value: totalProducts, href: null },
   ];
 
   return (
@@ -26,21 +31,36 @@ export default async function DashboardPage() {
       </h1>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        {cards.map((c) => (
-          <div
-            key={c.label}
-            className="rounded-xl border border-craft/30 bg-white p-5"
-          >
-            <p className="text-sm text-charcoal/70">{c.label}</p>
-            <p className="mt-2 text-3xl font-bold text-forest">
-              {c.value.toLocaleString("bn-BD")}
-            </p>
-          </div>
-        ))}
+        {cards.map((c) => {
+          const body = (
+            <>
+              <p className="text-sm text-charcoal/70">{c.label}</p>
+              <p className="mt-2 text-3xl font-bold text-forest">
+                {c.value.toLocaleString("bn-BD")}
+              </p>
+            </>
+          );
+          return c.href ? (
+            <Link
+              key={c.label}
+              href={c.href}
+              className="rounded-xl border border-craft/30 bg-white p-5 hover:border-forest"
+            >
+              {body}
+            </Link>
+          ) : (
+            <div
+              key={c.label}
+              className="rounded-xl border border-craft/30 bg-white p-5"
+            >
+              {body}
+            </div>
+          );
+        })}
       </div>
 
       <p className="mt-8 rounded-xl border border-craft/30 bg-white p-5 text-sm text-charcoal/80">
-        অর্ডার দেখা, স্টক ও পণ্য সম্পাদনা এখানে পরের ধাপে যোগ হবে।
+        পণ্য, স্টক ও ক্যাটাগরি সম্পাদনা পরের ধাপে যোগ হবে।
       </p>
     </div>
   );

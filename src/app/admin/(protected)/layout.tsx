@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "অ্যাডমিন | সততা",
+  title: "অ্যাডমিন | সততা ফুডস",
   robots: { index: false, follow: false },
 };
 
@@ -20,10 +20,20 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-cream">
       <header className="bg-forest text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link href="/admin/dashboard" className="font-bold">
-            সততা · অ্যাডমিন
-          </Link>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link href="/admin/dashboard" className="font-bold">
+              সততা ফুডস · অ্যাডমিন
+            </Link>
+            <nav className="flex gap-4 text-sm">
+              <Link href="/admin/dashboard" className="hover:underline">
+                ড্যাশবোর্ড
+              </Link>
+              <Link href="/admin/orders" className="hover:underline">
+                অর্ডার
+              </Link>
+            </nav>
+          </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="hidden sm:inline">{admin.name}</span>
             <form action={logout}>

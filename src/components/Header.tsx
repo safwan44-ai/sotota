@@ -22,7 +22,7 @@ export default function Header() {
             হোম
           </Link>
           <Link href="/shop" className="hover:text-forest">
-            দোকান
+            সকল পণ্য
           </Link>
           <CartLink />
         </nav>

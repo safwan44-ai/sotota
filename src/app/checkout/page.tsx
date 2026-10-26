@@ -6,7 +6,7 @@ import CheckoutForm from "@/components/CheckoutForm";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "চেকআউট | সততা",
+  title: "চেকআউট | সততা ফুডস",
   robots: { index: false, follow: false },
 };
 

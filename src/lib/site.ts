@@ -1,11 +1,11 @@
 export const site = {
   nameBn: "সততা",
-  nameEn: "Sotota",
+  nameEn: "Sotota Foods",
   tagline: "বাংলাদেশে অনলাইনে শুটকি মাছ।",
 
   // Fill these ONCE with your real details.
   address: "",
-  phone: "",
+  phone: "+880 1349-068173",
   email: "",
   // WhatsApp: digits only, with country code. Example: 8801XXXXXXXXX
   whatsapp: "",

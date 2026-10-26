@@ -233,3 +233,10 @@ model SiteSetting {
   key   String @id
   value String
 }
+model AdminLoginFailure {
+  id        String   @id @default(cuid())
+  email     String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
